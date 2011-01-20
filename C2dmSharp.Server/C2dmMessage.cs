@@ -17,7 +17,6 @@ namespace C2dmSharp
 			this.CollapseKey = string.Empty;
 			this.Data = new NameValueCollection();
 			this.DelayWhileIdle = null;
-			this.GoogleLoginAuthorizationToken = string.Empty;
 		}
 
 		public string RegistrationId
@@ -39,12 +38,6 @@ namespace C2dmSharp
 		}
 
 		public bool? DelayWhileIdle
-		{
-			get;
-			set;
-		}
-
-		public string GoogleLoginAuthorizationToken
 		{
 			get;
 			set;

@@ -1,15 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
+using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
+using System.Collections.Specialized;
 
 namespace C2dmSharp
 {
 	public class C2dmService
 	{
+		public string GoogleAuthToken
+		{
+			get;
+			set;
+		}
+
+		public string SenderID
+		{
+			get;
+			set;
+		}
+
+		public string ApplicationID
+		{
+			get;
+			set;
+		}
+
 		public event Action<MessageTransportException> MessageFailure;
 		public event Action<C2dmMessageTransportResponse> MessageSuccess;
 		public event Action<DateTime> Waiting;
@@ -25,6 +45,25 @@ namespace C2dmSharp
 
 		public C2dmService()
 		{
+			var googleAuthToken = ConfigurationManager.AppSettings["C2DM.GoogleAuthToken"] ?? "";
+			var senderID = ConfigurationManager.AppSettings["C2DM.SenderID"] ?? "";
+			var applicationID = ConfigurationManager.AppSettings["C2DM.ApplicationID"] ?? "";
+
+			init(googleAuthToken, senderID, applicationID);
+		}
+
+		public C2dmService(string googleAuthToken, string senderID, string applicationID)
+		{
+			init(googleAuthToken, senderID, applicationID);
+		}
+
+
+		private void init(string googleAuthToken, string senderID, string applicationID)
+		{
+			this.GoogleAuthToken = googleAuthToken;
+			this.SenderID = senderID;
+			this.ApplicationID = applicationID;
+
 			running = false;
 			//messages = new ConcurrentQueue<Message>();
 			messages = new BlockingCollection<C2dmMessage>();
@@ -68,6 +107,23 @@ namespace C2dmSharp
 		public bool Running
 		{
 			get { return running; }
+		}
+
+
+		public void QueueMessage(string registrationId, NameValueCollection data, string collapseKey)
+		{
+			QueueMessage(registrationId, data, collapseKey, null);
+		}
+
+		public void QueueMessage(string registrationId, NameValueCollection data, string collapseKey, bool? delayWhileIdle)
+		{
+			QueueMessage(new C2dmMessage()
+			{
+				RegistrationId = registrationId,
+				Data = data,
+				CollapseKey = collapseKey,
+				DelayWhileIdle = delayWhileIdle
+			});
 		}
 
 		public void QueueMessage(C2dmMessage msg)
@@ -135,7 +191,7 @@ namespace C2dmSharp
 				{
 					try
 					{
-						var result = C2dmMessageTransport.Send(toSend);
+						var result = C2dmMessageTransport.Send(toSend, this.GoogleAuthToken, this.SenderID, this.ApplicationID);
 
 						if (this.MessageSuccess != null)
 							this.MessageSuccess(result);

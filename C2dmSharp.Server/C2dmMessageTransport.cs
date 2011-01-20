@@ -11,19 +11,19 @@ namespace C2dmSharp
 	{
 		private const string C2DM_SEND_URL = "https://android.apis.google.com/c2dm/send";
 
-		public static C2dmMessageTransportResponse Send(C2dmMessage msg)
+		public static C2dmMessageTransportResponse Send(C2dmMessage msg, string googleLoginAuthorizationToken, string senderID, string applicationID)
 		{
-			return send(msg);
+			return send(msg, googleLoginAuthorizationToken, senderID, applicationID);
 		}
 
-		static C2dmMessageTransportResponse send(C2dmMessage msg)
+		static C2dmMessageTransportResponse send(C2dmMessage msg, string googleLoginAuthorizationToken, string senderID, string applicationID)
 		{
 			C2dmMessageTransportResponse result = new C2dmMessageTransportResponse();
 			result.Message = msg;
 
 			var webReq = HttpWebRequest.Create(C2DM_SEND_URL) as HttpWebRequest;
 
-			webReq.Headers["Authorization"] = msg.GoogleLoginAuthorizationToken;
+			webReq.Headers["Authorization"] = googleLoginAuthorizationToken;
 
 			using (var webReqStream = new StreamWriter(webReq.GetRequestStream()))
 			{
