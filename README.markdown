@@ -9,10 +9,14 @@ C2DM-Sharp is a set of .NET Libraries for [Google Android's Cloud 2 Device Messa
 
 ## What's Missing?
 The Client implementation, because of current MonoDroid limitations, does not generate the required AndroidManifest.xml changes in the referring application.
-I've written some of the attributes that are needed to make this happen, but if you look at C2dmBroadcastReceiver.cs line 20 you can see that you would have to replace __PackageName__ with the full package name of your application for the manifest generation to work.  
+I've written some of the attributes that are needed to make this happen, but if you look at C2dmBroadcastReceiver.cs you can see that you would have to replace __PackageName__ with the full package name of your application for the manifest generation to work.  
 There is a bug report in to address this issue.  The other issue is the generation of the required <permission> and <uses-permission> tags in the manifest.  Another bug was filed for this.
 
 For now, it's recommended that you merge the uncommented section of the AndroidManifest.xml (replacing __PackageName__) with your Application's manifest, and then changing the line mentioned above to refer to your package name.
+
+**Scalability** I have the service able to use a number of worker Tasks, but currently all the HTTP requests aren't taking advantage of async calls.  I plan on changing this so that the service can scale well.
+
+**Rate Limiting** Currently, the service will fire off messages from the queue as fast as possible.  It will backoff if google tells it to, but there's no other rate limiting mechanism in place (eg: to say only allow x requests per second).  This is something I think that would be a good addition.  You could then queue up a ton of messages and 'slowly' (relative term) send them without getting Google upset.
 
 ## How do I use it?
 + First, sign up for C2DM at: http://code.google.com/android/c2dm/signup.html

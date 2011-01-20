@@ -20,6 +20,8 @@ namespace C2dmSharp.Client.Sample
 		{
 			base.OnCreate(bundle);
 
+			Android.Util.Log.D("C2DM-Sample", "Hello World!");
+
 			// Set our view from the "main" layout resource
 			SetContentView(Resource.layout.main);
 
@@ -27,6 +29,8 @@ namespace C2dmSharp.Client.Sample
 			// and attach an event to it
 			buttonRegister = FindViewById<Button>(Resource.id.buttonRegister);
 			buttonUnregister = FindViewById<Button>(Resource.id.buttonUnregister);
+
+			Android.Util.Log.D("C2DM-Sample", "Got Buttons...");
 
 			buttonUnregister.Enabled = false;
 
@@ -49,12 +53,16 @@ namespace C2dmSharp.Client.Sample
 				C2dmSharp.Client.C2dmClient.Unregister(this);
 				buttonUnregister.Enabled = false;
 			};
-									
+
+
+			Android.Util.Log.D("C2DM-Sample", "Registered Button Clicks...");
 
 			C2dmSharp.Client.C2dmClient.ReceiveMessage += new Action<Bundle>(C2dmClient_ReceiveMessage);
 			C2dmSharp.Client.C2dmClient.Registered += new Action<string>(C2dmClient_Registered);
 			C2dmSharp.Client.C2dmClient.RegisterError += new Action<Exception>(C2dmClient_RegisterError);
 			C2dmSharp.Client.C2dmClient.Unregistered += new Action(C2dmClient_Unregistered);
+
+			Android.Util.Log.D("C2DM-Sample", "Registered Client Events...");
 		}
 
 		void C2dmClient_Unregistered()
