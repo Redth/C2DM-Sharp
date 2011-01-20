@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="c2dmsharp.client" android:versionCode="1" android:versionName="1.0">
+
+	<!-- BEGIN C2DM Sharp Manifest Data
+			 ============================== 
+			 
+			 Inculde this section in your app's AndroidManifest.xml file!
+			 
+			NOTE ON CONFIG: 
+			You must replace all instances of {YOUR.PACKAGE} with your own
+			package.name.  This should be the same as in your manifest tag:
+				eg: <manifest package="{YOUR.PACKAGE}" ..
+				
+			Older MonoDroid versions may have duplicated the package name:
+				eg: package="c2dmsharp.client.c2dmsharp.client"
+			In this case, you should replace {YOUR_PACKAGE} with c2dmsharp.client
+			Do not double up the namespace in this case!
+			
+			There are 6 instances of {YOUR.PACKAGE} to replace!
+	-->
+	
+		<!-- Only this application can receive the messages and registration result -->
+		<permission android:name="{YOUR.PACKAGE}.permission.C2D_MESSAGE" android:protectionLevel="signature" />
+		<uses-permission android:name="{YOUR.PACKAGE}.permission.C2D_MESSAGE" />
+
+		<!-- This app has permission to register and receive message -->
+		<uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+
+		<!-- Send the registration id to the server -->
+		<uses-permission android:name="android.permission.INTERNET" />
+
+		<!-- Only C2DM servers can send messages for the app. If permission is not set - any other app can generate it -->
+		<receiver android:name="{YOUR.PACKAGE}.C2dmBroadcastReceiver" android:permission="com.google.android.c2dm.permission.SEND">
+			<!-- Receive the actual message -->
+			<intent-filter>
+				<action android:name="com.google.android.c2dm.intent.RECEIVE" />
+				<category android:name="{YOUR.PACKAGE}" />
+			</intent-filter>
+			<!-- Receive the registration id -->
+			<intent-filter>
+				<action android:name="com.google.android.c2dm.intent.REGISTRATION" />
+				<category android:name="{YOUR.PACKAGE}" />
+			</intent-filter>
+		</receiver>
+
+		<service android:name="{YOUR.PACKAGE}.C2dmService" android:enabled="true" />
+	<!-- 
+			 ==============================
+		   END C2DM Sharp Manifest Data  
+	 -->
+	
+	
+	<application android:label="C2dmSharp.Client">
+  </application>
+  <uses-sdk android:minSdkVersion="8" />
+	
+</manifest>
