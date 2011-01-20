@@ -1,5 +1,4 @@
 # C2DM-Sharp
-==========
 C2DM-Sharp is a set of .NET Libraries for Google Android's Cloud 2 Device Messaging Push Notification system.
 
 ## What's it Contain?
