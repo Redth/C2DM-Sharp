@@ -7,7 +7,7 @@ using System.Web;
 using System.Net;
 
 
-namespace C2dmSharp
+namespace C2dmSharp.Server
 {
 	public class C2dmMessage
 	{
@@ -19,31 +19,43 @@ namespace C2dmSharp
 			this.DelayWhileIdle = null;
 		}
 
+		/// <summary>
+		/// Registration ID of the Device
+		/// </summary>
 		public string RegistrationId
 		{
 			get;
 			set;
 		}
 
+		/// <summary>
+		/// Only the latest message with the same collapse key will be delivered
+		/// </summary>
 		public string CollapseKey
 		{
 			get;
 			set;
 		}
 
+		/// <summary>
+		/// Key/Value pairs to be sent to the Device (as extras in the Intent)
+		/// </summary>
 		public NameValueCollection Data
 		{
 			get;
 			set;
 		}
 
+		/// <summary>
+		/// If true, C2DM will only be delivered once the device's screen is on
+		/// </summary>
 		public bool? DelayWhileIdle
 		{
 			get;
 			set;
 		}
 
-		public string GetPostData()
+		internal string GetPostData()
 		{
 			var sb = new StringBuilder();
 
@@ -70,7 +82,7 @@ namespace C2dmSharp
 			return sb.ToString();
 		}
 
-		public int GetMessageSize()
+		internal int GetMessageSize()
 		{
 			//http://groups.google.com/group/android-c2dm/browse_thread/thread/c70575480be4f883?pli=1
 			// suggests that the max size of 1024 bytes only includes 

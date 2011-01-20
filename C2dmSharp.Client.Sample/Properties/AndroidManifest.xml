@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="c2dmsharp.client.sample" android:versionCode="1" android:versionName="1.0">
+  <application android:label="C2dmSharp.Client.Sample">
+  </application>
+  <uses-sdk android:minSdkVersion="8" />
+	
+	
+	<permission android:name="c2dmsharp.client.sample.permission.C2D_MESSAGE" android:protectionLevel="signature" />
+	<uses-permission android:name="c2dmsharp.client.sample.permission.C2D_MESSAGE" />
+
+	<!-- This app has permission to register and receive message -->
+	<uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+
+	<!-- Send the registration id to the server -->
+	<uses-permission android:name="android.permission.INTERNET" />
+	
+</manifest>

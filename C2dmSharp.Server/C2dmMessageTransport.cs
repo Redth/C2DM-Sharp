@@ -4,11 +4,25 @@ using System.Linq;
 using System.Text;
 using System.Net;
 using System.IO;
+using System.Security.Cryptography.X509Certificates;
+using System.Security;
+using System.Net.Security;
 
-namespace C2dmSharp
+namespace C2dmSharp.Server
 {
-	public class C2dmMessageTransport
+	internal class C2dmMessageTransport
 	{
+		internal static event Action<string> UpdateGoogleClientAuthToken;
+
+		static C2dmMessageTransport()
+		{
+			ServicePointManager.ServerCertificateValidationCallback += certValidateCallback;
+		}
+		static bool certValidateCallback(object sender, X509Certificate cert, X509Chain chain, SslPolicyErrors policyErrs)
+		{
+			return true;
+		}
+
 		private const string C2DM_SEND_URL = "https://android.apis.google.com/c2dm/send";
 
 		public static C2dmMessageTransportResponse Send(C2dmMessage msg, string googleLoginAuthorizationToken, string senderID, string applicationID)
@@ -21,16 +35,19 @@ namespace C2dmSharp
 			C2dmMessageTransportResponse result = new C2dmMessageTransportResponse();
 			result.Message = msg;
 
-			var webReq = HttpWebRequest.Create(C2DM_SEND_URL) as HttpWebRequest;
+			var postData = msg.GetPostData();
 
-			webReq.Headers["Authorization"] = "GoogleLogin auth=" + googleLoginAuthorizationToken;
+			var webReq = (HttpWebRequest)WebRequest.Create(C2DM_SEND_URL);
+			webReq.ContentLength = postData.Length;
+			webReq.Method = "POST";
+			webReq.Headers.Add("Authorization: GoogleLogin auth=" + googleLoginAuthorizationToken); 
 
-			using (var webReqStream = new StreamWriter(webReq.GetRequestStream()))
+			using (var webReqStream = new StreamWriter(webReq.GetRequestStream(), Encoding.ASCII))
 			{
 				webReqStream.Write(msg.GetPostData());
-				webReqStream.Flush();
-			}
-
+				webReqStream.Close();
+			}		
+			
 			try
 			{
 				var webResp = webReq.GetResponse() as HttpWebResponse;
@@ -39,14 +56,20 @@ namespace C2dmSharp
 				{					
 					result.ResponseStatus = MessageTransportResponseStatus.Ok;
 
-					var wrId = webResp.GetResponseHeader("id");
-					var wrErr = webResp.GetResponseHeader("Error");
+					//Check for an updated auth token and store it here if necessary
+					var updateClientAuth = webResp.GetResponseHeader("Update-Client-Auth");
+					if (!string.IsNullOrEmpty(updateClientAuth) && C2dmMessageTransport.UpdateGoogleClientAuthToken != null)
+						UpdateGoogleClientAuthToken(updateClientAuth);
+						
+					//Get the response body
+					var responseBody = "Error=";
+					try { responseBody = (new StreamReader(webResp.GetResponseStream())).ReadToEnd(); }
+					catch { }
 
-					if (!string.IsNullOrEmpty(wrId))
-						result.MessageId = wrId;
-
-					if (!string.IsNullOrEmpty(wrErr))
+					//Handle the type of error
+					if (responseBody.StartsWith("Error="))
 					{
+						var wrErr = responseBody.Substring(responseBody.IndexOf("Error=") + 6);
 						switch (wrErr.ToLower().Trim())
 						{
 							case "quotaexceeded":
@@ -67,10 +90,15 @@ namespace C2dmSharp
 							case "missingcollapsekey":
 								result.ResponseStatus = MessageTransportResponseStatus.MissingCollapseKey;
 								break;
+							default:
+								result.ResponseStatus = MessageTransportResponseStatus.Error;
+								break;
 						}
 
-						throw new MessageTransportException(wrErr, result);						
-					}				
+						throw new MessageTransportException(wrErr, result);
+					}
+					else
+						result.MessageId = responseBody;
 				}
 			}
 			catch (WebException webEx)

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace C2dmSharp
+namespace C2dmSharp.Server
 {
 	public class C2dmMessageTransportResponse
 	{

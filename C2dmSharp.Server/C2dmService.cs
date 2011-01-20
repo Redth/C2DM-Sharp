@@ -10,7 +10,7 @@ using System.Collections.Specialized;
 using System.Security;
 using System.Net;
 
-namespace C2dmSharp
+namespace C2dmSharp.Server
 {
 	public class C2dmService
 	{
@@ -65,6 +65,12 @@ namespace C2dmSharp
 			init(senderID, password, applicationID);
 		}
 
+		/// <summary>
+		/// Ctor
+		/// </summary>
+		/// <param name="senderID">Email address (google account) used to sign up for Google's C2DM application Whitelist</param>
+		/// <param name="password">Password used to login with Email</param>
+		/// <param name="applicationID">Application (Package Name) used to sign up for Google's C2DM Whitelist</param>
 		public C2dmService(string senderID, string password, string applicationID)
 		{
 			init(senderID, password, applicationID);
@@ -73,6 +79,12 @@ namespace C2dmSharp
 
 		private void init(string senderID, string password, string applicationID)
 		{
+			//Listens for headers back from google to update our auth token
+			C2dmMessageTransport.UpdateGoogleClientAuthToken += delegate(string authToken)
+			{
+				this.googleAuthToken = authToken;
+			};
+
 			this.SenderID = senderID;
 			this.Password = password;
 			this.SenderID = senderID;
@@ -87,10 +99,13 @@ namespace C2dmSharp
 			RefreshGoogleAuthToken();
 		}
 
+		/// <summary>
+		/// Explicitly refreshes the Google Auth Token.  Usually not necessary.
+		/// </summary>
 		public void RefreshGoogleAuthToken()
 		{
 			string authUrl = "https://www.google.com/accounts/ClientLogin";
-
+			
 			var data = new NameValueCollection();
 
 			data.Add("Email", this.SenderID);
@@ -101,7 +116,16 @@ namespace C2dmSharp
 
 			var wc = new WebClient();
 			
-			try { googleAuthToken = Encoding.ASCII.GetString(wc.UploadValues(authUrl, data)); }
+			try 
+			{				
+				var authStr = Encoding.ASCII.GetString(wc.UploadValues(authUrl, data));
+				
+				//Only care about the Auth= part at the end
+				if (authStr.Contains("Auth="))
+					googleAuthToken = authStr.Substring(authStr.IndexOf("Auth=") + 5);
+				else
+					throw new GoogleLoginAuthorizationException("Missing Auth Token");
+			}
 			catch (WebException ex)
 			{
 				var result = "Unknown Error";
@@ -112,6 +136,10 @@ namespace C2dmSharp
 			}
 		}
 
+		/// <summary>
+		/// Increase or decrease the number of workers to process queued messages.
+		/// </summary>
+		/// <param name="value">New Value for the number of workers to use</param>
 		public void SetNumberOfWorkers(int value)
 		{
 			lock (workers)
@@ -141,22 +169,40 @@ namespace C2dmSharp
 			}
 		}
 
+		/// <summary>
+		/// How many worksers are currently running
+		/// </summary>
 		public int NumberOfWorkers
 		{
 			get { return workers.Count; }
 		}
 
+		/// <summary>
+		/// Is the Service Running or not
+		/// </summary>
 		public bool Running
 		{
 			get { return running; }
 		}
 
-
+		/// <summary>
+		/// Queues a new C2DM Message to be sent
+		/// </summary>
+		/// <param name="registrationId">Registration ID of the Device</param>
+		/// <param name="data">Key/Value Collection of data or 'extras' to send</param>
+		/// <param name="collapseKey">Collapse Key</param>
 		public void QueueMessage(string registrationId, NameValueCollection data, string collapseKey)
 		{
 			QueueMessage(registrationId, data, collapseKey, null);
 		}
 
+		/// <summary>
+		/// Queues a new C2DM Message to be sent
+		/// </summary>
+		/// <param name="registrationId">Registration ID of the Device</param>
+		/// <param name="data">Key/Value Collection of data or 'extras' to send</param>
+		/// <param name="collapseKey">Collapse Key</param>
+		/// <param name="delayWhileIdle">If true, C2DM will only be delivered once the device's screen is on</param>
 		public void QueueMessage(string registrationId, NameValueCollection data, string collapseKey, bool? delayWhileIdle)
 		{
 			QueueMessage(new C2dmMessage()
@@ -168,12 +214,19 @@ namespace C2dmSharp
 			});
 		}
 
+		/// <summary>
+		/// Queues a new C2DM Message to be sent
+		/// </summary>
+		/// <param name="msg">Constructed C2dmMessage parameter</param>
 		public void QueueMessage(C2dmMessage msg)
 		{
 			messages.Add(msg);
 			//messages.Enqueue(msg);
 		}
 
+		/// <summary>
+		/// How many messages are left in the queue to be sent
+		/// </summary>
 		public int QueueLength
 		{
 			get { return messages.Count; }
@@ -184,6 +237,10 @@ namespace C2dmSharp
 			Start(1);
 		}
 
+		/// <summary>
+		/// Starts the specified number of workers ready to send queued messages
+		/// </summary>
+		/// <param name="numberOfWorkers">Number of Workers</param>
 		public void Start(int numberOfWorkers)
 		{
 			running = true;
@@ -191,6 +248,9 @@ namespace C2dmSharp
 			SetNumberOfWorkers(numberOfWorkers);
 		}
 
+		/// <summary>
+		/// Stops all workers and the service, without waiting for queued messages to be sent.
+		/// </summary>
 		public void Stop()
 		{
 			running = false;

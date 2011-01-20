@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace C2dmSharp
+namespace C2dmSharp.Server
 {
 	internal class C2dmMessageTransportWorker
 	{

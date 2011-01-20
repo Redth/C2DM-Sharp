@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="click_to_register">Register for C2DM</string>
+    <string name="click_to_unregister">Unregister from C2DM</string>
+		<string name="app_name">C2dmSharp.Client.Sample</string>
+		<string name="hello">Hello World, Click Me!</string>
+</resources>

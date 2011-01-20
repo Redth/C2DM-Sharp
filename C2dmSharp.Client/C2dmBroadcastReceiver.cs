@@ -16,8 +16,8 @@ namespace C2dmSharp.Client
 	// Hoping we get something in MonoDroid that will do this automatically in the future!
 	[BroadcastReceiver(Permission=C2dmBroadcastReceiver.GOOGLE_PERMISSION_C2DM_SEND)]
 	[IntentFilter(new string[] { C2dmBroadcastReceiver.GOOGLE_ACTION_C2DM_INTENT_RECEIVE, 
-								C2dmBroadcastReceiver.GOOGLE_ACTION_C2DM_INTENT_REGISTRATION }, 
-		Categories=new string[]{ "__PackageName__" })]
+								C2dmBroadcastReceiver.GOOGLE_ACTION_C2DM_INTENT_REGISTRATION },
+		Categories = new string[] { "__PackageName__" })]
 	public class C2dmBroadcastReceiver : BroadcastReceiver
 	{
 		public static string AppName = "";
