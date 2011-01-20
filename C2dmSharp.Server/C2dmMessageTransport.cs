@@ -23,7 +23,7 @@ namespace C2dmSharp
 
 			var webReq = HttpWebRequest.Create(C2DM_SEND_URL) as HttpWebRequest;
 
-			webReq.Headers["Authorization"] = googleLoginAuthorizationToken;
+			webReq.Headers["Authorization"] = "GoogleLogin auth=" + googleLoginAuthorizationToken;
 
 			using (var webReqStream = new StreamWriter(webReq.GetRequestStream()))
 			{
