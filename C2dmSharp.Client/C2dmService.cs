@@ -8,6 +8,7 @@ using Android.Content;
 
 namespace C2dmSharp.Client
 {
+	[Service]
 	public class C2dmService : IntentService
 	{
 		protected override void OnHandleIntent(Android.Content.Intent intent)

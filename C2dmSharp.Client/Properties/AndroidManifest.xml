@@ -16,7 +16,7 @@
 			In this case, you should replace {YOUR_PACKAGE} with c2dmsharp.client
 			Do not double up the namespace in this case!
 			
-			There are 6 instances of {YOUR.PACKAGE} to replace!
+			There are 2 instances of {YOUR.PACKAGE} to replace!
 	-->
 	
 		<!-- Only this application can receive the messages and registration result -->
@@ -30,20 +30,18 @@
 		<uses-permission android:name="android.permission.INTERNET" />
 
 		<!-- Only C2DM servers can send messages for the app. If permission is not set - any other app can generate it -->
+		<!-- Experimenting with not needing this anymore :) -
 		<receiver android:name="{YOUR.PACKAGE}.C2dmBroadcastReceiver" android:permission="com.google.android.c2dm.permission.SEND">
-			<!-- Receive the actual message -->
 			<intent-filter>
 				<action android:name="com.google.android.c2dm.intent.RECEIVE" />
 				<category android:name="{YOUR.PACKAGE}" />
 			</intent-filter>
-			<!-- Receive the registration id -->
 			<intent-filter>
 				<action android:name="com.google.android.c2dm.intent.REGISTRATION" />
 				<category android:name="{YOUR.PACKAGE}" />
 			</intent-filter>
 		</receiver>
-
-		<service android:name="{YOUR.PACKAGE}.C2dmService" android:enabled="true" />
+		-->
 	<!-- 
 			 ==============================
 		   END C2DM Sharp Manifest Data  
