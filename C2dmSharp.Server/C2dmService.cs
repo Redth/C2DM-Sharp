@@ -7,28 +7,41 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Collections.Specialized;
+using System.Security;
+using System.Net;
 
 namespace C2dmSharp
 {
 	public class C2dmService
 	{
-		public string GoogleAuthToken
-		{
-			get;
-			set;
-		}
-
+		/// <summary>
+		/// This is the Email that you used to be registered on google's c2dm whitelist
+		/// </summary>
 		public string SenderID
 		{
 			get;
 			set;
 		}
 
+		/// <summary>
+		/// Password for the SenderID
+		/// </summary>
+		public string Password
+		{
+			get;
+			set;
+		}
+
+		/// <summary>
+		/// Application ID that you registered with on google's Whitelist
+		/// </summary>
 		public string ApplicationID
 		{
 			get;
 			set;
 		}
+
+		private string googleAuthToken = string.Empty;
 
 		public event Action<MessageTransportException> MessageFailure;
 		public event Action<C2dmMessageTransportResponse> MessageSuccess;
@@ -45,22 +58,23 @@ namespace C2dmSharp
 
 		public C2dmService()
 		{
-			var googleAuthToken = ConfigurationManager.AppSettings["C2DM.GoogleAuthToken"] ?? "";
 			var senderID = ConfigurationManager.AppSettings["C2DM.SenderID"] ?? "";
+			var password = ConfigurationManager.AppSettings["C2DM.Password"] ?? "";
 			var applicationID = ConfigurationManager.AppSettings["C2DM.ApplicationID"] ?? "";
 
-			init(googleAuthToken, senderID, applicationID);
+			init(senderID, password, applicationID);
 		}
 
-		public C2dmService(string googleAuthToken, string senderID, string applicationID)
+		public C2dmService(string senderID, string password, string applicationID)
 		{
-			init(googleAuthToken, senderID, applicationID);
+			init(senderID, password, applicationID);
 		}
 
 
-		private void init(string googleAuthToken, string senderID, string applicationID)
+		private void init(string senderID, string password, string applicationID)
 		{
-			this.GoogleAuthToken = googleAuthToken;
+			this.SenderID = senderID;
+			this.Password = password;
 			this.SenderID = senderID;
 			this.ApplicationID = applicationID;
 
@@ -68,6 +82,34 @@ namespace C2dmSharp
 			//messages = new ConcurrentQueue<Message>();
 			messages = new BlockingCollection<C2dmMessage>();
 			workers = new List<C2dmMessageTransportWorker>();
+
+			//Get a new auth token
+			RefreshGoogleAuthToken();
+		}
+
+		public void RefreshGoogleAuthToken()
+		{
+			string authUrl = "https://www.google.com/accounts/ClientLogin";
+
+			var data = new NameValueCollection();
+
+			data.Add("Email", this.SenderID);
+			data.Add("Passwd", this.Password);
+			data.Add("accountType", "GOOGLE_OR_HOSTED");
+			data.Add("service", "ac2dm");
+			data.Add("source", this.ApplicationID);
+
+			var wc = new WebClient();
+			
+			try { googleAuthToken = Encoding.ASCII.GetString(wc.UploadValues(authUrl, data)); }
+			catch (WebException ex)
+			{
+				var result = "Unknown Error";
+				try { result = (new System.IO.StreamReader(ex.Response.GetResponseStream())).ReadToEnd(); }
+				catch { }
+
+				throw new GoogleLoginAuthorizationException(result);
+			}
 		}
 
 		public void SetNumberOfWorkers(int value)
@@ -191,7 +233,7 @@ namespace C2dmSharp
 				{
 					try
 					{
-						var result = C2dmMessageTransport.Send(toSend, this.GoogleAuthToken, this.SenderID, this.ApplicationID);
+						var result = C2dmMessageTransport.Send(toSend, this.googleAuthToken, this.SenderID, this.ApplicationID);
 
 						if (this.MessageSuccess != null)
 							this.MessageSuccess(result);

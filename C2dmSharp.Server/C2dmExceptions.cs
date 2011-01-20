@@ -41,5 +41,13 @@ namespace C2dmSharp
 			: base("Invalid ClientLogin GoogleLogin Authentication Token", response)
 		{
 		}
-	}	
+	}
+
+	public class GoogleLoginAuthorizationException : Exception
+	{
+		public GoogleLoginAuthorizationException(string msg)
+			: base(msg)
+		{
+		}
+	}
 }
