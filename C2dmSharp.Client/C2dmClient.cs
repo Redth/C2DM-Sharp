@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 using Android.App;
 using Android.Content;
@@ -16,48 +17,43 @@ namespace C2dmSharp.Client
 	public class C2dmClient
 	{
 		/// <summary>
-		/// Raised whenever a C2DM Message is Received, includes a Bundle object with Key/Value extras data pairs
+		/// Incoming Intents have this action which indicates a Message was received
 		/// </summary>
-		public static event Action<Bundle> ReceiveMessage;
+		public const string GOOGLE_ACTION_C2DM_INTENT_RECEIVE = "com.google.android.c2dm.intent.RECEIVE";
 
 		/// <summary>
-		/// Raised whenever there is an error Registering for C2DM
+		/// Incoming Intents have this action which indicates Registration results
 		/// </summary>
-		public static event Action<Exception> RegisterError;
+		public const string GOOGLE_ACTION_C2DM_INTENT_REGISTRATION = "com.google.android.c2dm.intent.REGISTRATION";
 
 		/// <summary>
-		/// Raised whenever the device has successfully registered for C2DM, with the Registration_ID
+		/// Use this intent to start a register request
 		/// </summary>
-		public static event Action<string> Registered;
+		public const string GOOGLE_ACTION_C2DM_INTENT_REGISTER = "com.google.android.c2dm.intent.REGISTER";
 
 		/// <summary>
-		/// Raised whenever the device has successfully unregistered from C2DM
+		/// Use this intent to start an unregister request
 		/// </summary>
-		public static event Action Unregistered;
+		public const string GOOGLE_ACTION_C2DM_INTENT_UNREGISTER = "com.google.android.c2dm.intent.UNREGISTER";
+
+		/// <summary>
+		/// Permission that the BroadcastReceiver needs
+		/// </summary>
+		public const string GOOGLE_PERMISSION_C2DM_SEND = "com.google.android.c2dm.permission.SEND";
 
 		/// <summary>
 		/// Register's the Device for C2DM Messages
 		/// </summary>
 		/// <param name="context">Context</param>
-		public static void Register(Context context) //, string emailOfSender)
+		/// <param name="senderIdEmail">Email address whitelisted as the Sender ID for your App</param>
+		public static void Register(Context context, string senderIdEmail)
 		{
-			var accountManager = context.GetSystemService(Context.AccountService) as AccountManager;
-
-			var accounts = accountManager.GetAccountsByType("com.google");
-
-			if (accounts == null || accounts.Length <= 0)
-			{
-				if (C2dmClient.RegisterError != null)
-					C2dmClient.RegisterError(new NoGoogleAccountsOnDeviceRegistrationException());
-				else
-					throw new NoGoogleAccountsOnDeviceRegistrationException();
-			}
-
-			var email = accounts[0].Name;
-
-			Intent registrationIntent = new Intent("com.google.android.c2dm.intent.REGISTER");
+			//Create our intent, with a pending intent to our app's broadcast
+			Intent registrationIntent = new Intent(GOOGLE_ACTION_C2DM_INTENT_REGISTER);
 			registrationIntent.PutExtra("app", PendingIntent.GetBroadcast(context, 0, new Intent(), 0));
-			registrationIntent.PutExtra("sender", email);
+			registrationIntent.PutExtra("sender", senderIdEmail);
+
+			//Start intent
 			context.StartService(registrationIntent);
 		}
 
@@ -73,28 +69,15 @@ namespace C2dmSharp.Client
 		}
 
 
-		internal static void FireRegistered(string registrationId)
+		public static string GetRegistrationId(Context context)
 		{
-			if (C2dmClient.Registered != null)
-				C2dmClient.Registered.BeginInvoke(registrationId, null, null);
-		}
+			var result = string.Empty;
 
-		internal static void FireUnregistered()
-		{
-			if (C2dmClient.Unregistered != null)
-				C2dmClient.Unregistered.BeginInvoke(null, null);
-		}
+			//Get the shared pref for c2dmsharp,  and read the registration id
+			var prefs = context.GetSharedPreferences("c2dmsharp", FileCreationMode.Private);
+			result = prefs.GetString("registration_id", string.Empty);
 
-		internal static void FireError(Exception ex)
-		{
-			if (C2dmClient.RegisterError != null)
-				C2dmClient.RegisterError.BeginInvoke(ex, null, null);
-		}
-
-		internal static void FireReceiveMessage(Bundle extras)
-		{
-			if (C2dmClient.ReceiveMessage != null)
-				C2dmClient.ReceiveMessage.BeginInvoke(extras, null, null);
+			return result;
 		}
 	}
 }

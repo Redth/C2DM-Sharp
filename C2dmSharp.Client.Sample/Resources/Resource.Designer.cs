@@ -15,66 +15,55 @@ namespace C2dmSharp.Client.Sample
 	public partial class Resource
 	{
 		
-		public class attr
+		public partial class Attribute
 		{
 			
-			private attr()
+			private Attribute()
 			{
 			}
 		}
 		
-		public class drawable
+		public partial class Drawable
 		{
 			
 			// aapt resource value: 0x7f020000
 			public const int icon = 2130837504;
 			
-			private drawable()
+			private Drawable()
 			{
 			}
 		}
 		
-		public class layout
+		public partial class Id
+		{
+			
+			// aapt resource value: 0x7f040003
+			public const int buttonRegister = 2130968579;
+			
+			// aapt resource value: 0x7f040004
+			public const int textHints = 2130968580;
+			
+			// aapt resource value: 0x7f040002
+			public const int textLastMessage = 2130968578;
+			
+			// aapt resource value: 0x7f040001
+			public const int textRegistrationId = 2130968577;
+			
+			// aapt resource value: 0x7f040000
+			public const int textRegistrationStatus = 2130968576;
+			
+			private Id()
+			{
+			}
+		}
+		
+		public partial class Layout
 		{
 			
 			// aapt resource value: 0x7f030000
 			public const int main = 2130903040;
 			
-			private layout()
-			{
-			}
-		}
-		
-		public class @string
-		{
-			
-			// aapt resource value: 0x7f040000
-			public const int click_to_register = 2130968576;
-			
-			// aapt resource value: 0x7f040001
-			public const int click_to_unregister = 2130968577;
-			
-			// aapt resource value: 0x7f040002
-			public const int app_name = 2130968578;
-			
-			// aapt resource value: 0x7f040003
-			public const int hello = 2130968579;
-			
-			private @string()
-			{
-			}
-		}
-		
-		public class id
-		{
-			
-			// aapt resource value: 0x7f050000
-			public const int buttonRegister = 2131034112;
-			
-			// aapt resource value: 0x7f050001
-			public const int buttonUnregister = 2131034113;
-			
-			private id()
+			private Layout()
 			{
 			}
 		}

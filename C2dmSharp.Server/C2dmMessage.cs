@@ -60,8 +60,8 @@ namespace C2dmSharp.Server
 			var sb = new StringBuilder();
 
 			sb.AppendFormat("registration_id={0}&collapse_key={1}&", //&auth={2}&",
-				HttpUtility.UrlEncode(this.RegistrationId),
-				HttpUtility.UrlEncode(this.CollapseKey)
+				this.RegistrationId,
+				this.CollapseKey
 				//HttpUtility.UrlEncode(this.GoogleLoginAuthorizationToken)
 				);
 
@@ -71,8 +71,8 @@ namespace C2dmSharp.Server
 			foreach (var key in this.Data.AllKeys)
 			{
 				sb.AppendFormat("data.{0}={1}&",
-					HttpUtility.UrlEncode(key),
-					HttpUtility.UrlEncode(this.Data[key]));
+					key,
+					this.Data[key]);
 			}
 
 			//Remove trailing & if necessary

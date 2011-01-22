@@ -317,7 +317,7 @@ namespace C2dmSharp.Server
 					}
 					catch (Exception ex)
 					{
-
+						//TODO: Log Error
 					}
 				}
 			}

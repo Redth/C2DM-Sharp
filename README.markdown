@@ -8,9 +8,9 @@ C2DM-Sharp is a set of .NET Libraries for [Google Android's Cloud 2 Device Messa
 + **C2dmSharp.Client.Sample** - Sample Android app (replace __PackageName__ in broadcast receiver with c2dmsharp.client.sample before compiling!!!)
 
 ## What's Missing?
-The Client implementation, because of current MonoDroid limitations, does not generate the required AndroidManifest.xml changes in the referring application.
-I've written some of the attributes that are needed to make this happen, but if you look at C2dmBroadcastReceiver.cs you can see that you would have to replace __PackageName__ with the full package name of your application for the manifest generation to work.  
-There is a bug report in to address this issue.  The other issue is the generation of the required <permission> and <uses-permission> tags in the manifest.  Another bug was filed for this.
+The Client implementation, because of current MonoDroid limitations, does not completely generate the required AndroidManifest.xml changes in the referring application.
+I've written some of the attributes that are needed to make this happen, but if you look at attributes in the subclassed BroadcastReceiver in the Client sample, you can see that you would have to use your own package name for the manifest generation to work.  
+There is a bug report in to address this issue.  The other issue is the generation of the required <permission> and <uses-permission> tags in the manifest.  Another bug was filed for this.  Here again you need to use your own package name where appropriate.
 
 For now, it's recommended that you merge the uncommented section of the AndroidManifest.xml (replacing __PackageName__) with your Application's manifest, and then changing the line mentioned above to refer to your package name.
 
@@ -21,6 +21,8 @@ For now, it's recommended that you merge the uncommented section of the AndroidM
 ## How do I use it?
 + First, sign up for C2DM at: http://code.google.com/android/c2dm/signup.html
 + Download the source code and view the samples 
++ Change your SenderID wherever relevant in the samples (eg: C2dmSharp.Client's DefaultActivity.cs in the top)
++ If you're not using the Client.Sample, make sure you add the right permissions from the sample's manifest, with your own package name in the right places.  Also make sure you change the package name in your subclassed C2dmBroadcastReceiver's attributes!
 + Better instructions coming soon... ;)
 
 ## Links
@@ -29,7 +31,11 @@ For now, it's recommended that you merge the uncommented section of the AndroidM
 
 
 ## Changelog
-**Jan 20, 2011 @ 1:12pm**
+** Jan 22, 2011 @ 6:30pm **
++ Samples work!  YMMV, you need to register your own accounts and make the changes in the right places, but I got it working here using both libraries!
++ HUGE update, lots of changes, things actually work now, too many changes to list
+
+** Jan 20, 2011 @ 1:12pm **
 + Server looks like it can actually send messages now :)
 + Added Samples for Client and Server apps
 + Server now will authenticate itself with the provided SenderID, Password, and ApplicationID

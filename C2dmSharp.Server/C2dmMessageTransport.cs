@@ -38,13 +38,16 @@ namespace C2dmSharp.Server
 			var postData = msg.GetPostData();
 
 			var webReq = (HttpWebRequest)WebRequest.Create(C2DM_SEND_URL);
-			webReq.ContentLength = postData.Length;
+			//webReq.ContentLength = postData.Length;
 			webReq.Method = "POST";
+			webReq.ContentType = "application/x-www-form-urlencoded";
+			webReq.UserAgent = "C2DM-Sharp (version: 1.0)";
 			webReq.Headers.Add("Authorization: GoogleLogin auth=" + googleLoginAuthorizationToken); 
 
 			using (var webReqStream = new StreamWriter(webReq.GetRequestStream(), Encoding.ASCII))
 			{
-				webReqStream.Write(msg.GetPostData());
+				var data = msg.GetPostData();
+				webReqStream.Write(data);
 				webReqStream.Close();
 			}		
 			
@@ -98,7 +101,11 @@ namespace C2dmSharp.Server
 						throw new MessageTransportException(wrErr, result);
 					}
 					else
-						result.MessageId = responseBody;
+					{
+						//Get the message ID
+						if (responseBody.StartsWith("id="))
+							result.MessageId = responseBody.Substring(3).Trim();
+					}
 				}
 			}
 			catch (WebException webEx)

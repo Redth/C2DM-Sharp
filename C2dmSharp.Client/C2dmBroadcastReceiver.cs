@@ -12,26 +12,48 @@ using Android.Widget;
 
 namespace C2dmSharp.Client
 {
-	//TODO: NOTE: Replace __PackageName__ with your actual package name for now!!!
-	// Hoping we get something in MonoDroid that will do this automatically in the future!
-	[BroadcastReceiver(Permission=C2dmBroadcastReceiver.GOOGLE_PERMISSION_C2DM_SEND)]
-	[IntentFilter(new string[] { C2dmBroadcastReceiver.GOOGLE_ACTION_C2DM_INTENT_RECEIVE }, 
-		Categories = new string[] { "c2dmsharp.client.sample" })]
-	[IntentFilter(new string[] { C2dmBroadcastReceiver.GOOGLE_ACTION_C2DM_INTENT_REGISTRATION }, 
-		Categories = new string[] { "c2dmsharp.client.sample" })]
-	
-	public class C2dmBroadcastReceiver : BroadcastReceiver
+	public class C2dmBroadcastReceiver<TService> : BroadcastReceiver where TService : Service
 	{
-		public const string GOOGLE_ACTION_C2DM_INTENT_RECEIVE = "com.google.android.c2dm.permission.RECEIVE";
-		public const string GOOGLE_ACTION_C2DM_INTENT_REGISTRATION = "com.google.android.c2dm.intent.REGISTRATION";
-		public const string GOOGLE_PERMISSION_C2DM_SEND = "com.google.android.c2dm.permission.SEND";
+		public C2dmBroadcastReceiver()
+			: base()
+		{ }
 
 		public override void OnReceive(Context context, Intent intent)
 		{
-			var c2dmIntent = new Intent(context, typeof(C2dmService));
-			c2dmIntent.PutExtras(intent.Extras);
+			var c2dmServiceIntent = new Intent(context, typeof(TService));
+			c2dmServiceIntent.PutExtras(intent.Extras);
+			c2dmServiceIntent.PutExtra("c2dm_action", intent.Action);
 
-			context.StartService(c2dmIntent);			
+			//Start our service
+			context.StartService(c2dmServiceIntent);
 		}
 	}
+
+	//For future possible use...
+	//public class C2dmReceiverAttribute : BroadcastReceiverAttribute
+	//{
+	//    public C2dmReceiverAttribute()
+	//        : base()
+	//    {
+	//        Permission = C2dmClient.GOOGLE_PERMISSION_C2DM_SEND;
+	//    }
+	//}
+
+	//public class C2dmReceiveIntentFilterAttribute : IntentFilterAttribute
+	//{
+	//    public C2dmReceiveIntentFilterAttribute(string packageName)
+	//        : base(new string[] { C2dmClient.GOOGLE_ACTION_C2DM_INTENT_RECEIVE })
+	//    {
+	//        Categories = new string[] { packageName };
+	//    }
+	//}
+
+	//public class C2dmRegistrationIntentFilterAttribute : IntentFilterAttribute
+	//{
+	//    public C2dmRegistrationIntentFilterAttribute(string packageName)
+	//        : base(new string[] { C2dmClient.GOOGLE_ACTION_C2DM_INTENT_REGISTRATION })
+	//    {
+	//        Categories = new string[] { packageName };
+	//    }
+	//}
 }

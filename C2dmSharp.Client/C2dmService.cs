@@ -2,43 +2,146 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 using Android.App;
 using Android.Content;
+using Android.OS;
+using Android.Runtime;
+using Android.Views;
+using Android.Widget;
+
 
 namespace C2dmSharp.Client
 {
-	[Service]
-	public class C2dmService : IntentService
+	public class C2dmService : Service
 	{
-		protected override void OnHandleIntent(Android.Content.Intent intent)
+		Queue<Intent> intents;
+		Thread thread;
+
+		public C2dmService()
+			: base()
 		{
-			//Handle the c2dm intent, decide which it is
-			if (intent.Action == C2dmBroadcastReceiver.GOOGLE_ACTION_C2DM_INTENT_REGISTRATION)
+			intents = new Queue<Intent>();
+			thread = null;
+		}
+
+		public override IBinder OnBind(Intent intent)
+		{
+			return default(IBinder);
+		}
+
+		public override void OnCreate()
+		{
+			base.OnCreate();
+		}
+
+		public override StartCommandResult OnStartCommand(Intent intent, StartCommandFlags flags, int startId)
+		{
+			base.OnStartCommand(intent, flags, startId);
+
+			// Queue up the intent to be processed
+			this.intents.Enqueue(intent);
+
+			//Check if the thread needs starting
+			if (thread == null || !thread.IsAlive)
 			{
-				var registrationId = intent.GetStringExtra("registration_id");
-				if (!string.IsNullOrEmpty(registrationId))
-				{
-					C2dmClient.FireRegistered(registrationId);
-					return;
-				}
-
-				var unregistered = intent.GetStringExtra("unregistered");
-				if (!string.IsNullOrEmpty(unregistered))
-				{
-					C2dmClient.FireUnregistered();
-					return;
-				}
-
-				var error = intent.GetStringExtra("error");
-				if (!string.IsNullOrEmpty(error))
-				{
-					C2dmClient.FireError(new C2dmRegistrationError(error, C2dmRegistrationError.GetErrorDescription(error)));
-					return;
-				}			
+				thread = new Thread(new ThreadStart(intentWorker));
+				thread.Start();
 			}
-			else if (intent.Action == C2dmBroadcastReceiver.GOOGLE_ACTION_C2DM_INTENT_RECEIVE)
-				C2dmClient.FireReceiveMessage(intent.Extras);
+
+			//Don't want this service always running
+			return StartCommandResult.NotSticky;
+		}
+
+		void intentWorker()
+		{
+			//Keep working while there are intents to process
+			while (intents.Count > 0)
+			{
+				//Get an intent off the queue
+				var intent = intents.Dequeue();
+
+				try
+				{
+					//See what the action is
+					var c2dmAction = intent.GetStringExtra("c2dm_action");
+
+					//We need an action otherwise don't know what to do
+					if (string.IsNullOrEmpty(c2dmAction))
+						continue;
+
+					//Handle the c2dm intent, decide which it is
+					if (c2dmAction == C2dmClient.GOOGLE_ACTION_C2DM_INTENT_REGISTRATION)
+					{
+						var registrationId = intent.GetStringExtra("registration_id");
+						
+						if (!string.IsNullOrEmpty(registrationId))
+						{
+							//Get the shared preferences, editor, and save the id
+							var prefs = GetSharedPreferences("c2dmsharp", FileCreationMode.Private);
+							var editor = prefs.Edit();
+							editor.PutString("registration_id", registrationId);
+							editor.Commit();
+
+							//Call our base method
+							this.OnRegistered(registrationId);
+							return;
+						}
+
+						var unregistered = intent.GetStringExtra("unregistered");
+
+						if (!string.IsNullOrEmpty(unregistered))
+						{
+							//Get the shared preferences, last id, editor, and clear the id
+							var prefs = GetSharedPreferences("c2dmsharp", FileCreationMode.Private);
+							var lastRegistrationId = prefs.GetString("registration_id", string.Empty);
+							var editor = prefs.Edit();
+							editor.PutString("registration_id", string.Empty);
+							editor.Commit();
+
+							this.OnUnregistered(lastRegistrationId);
+							return;
+						}
+
+						var error = intent.GetStringExtra("error");
+						if (!string.IsNullOrEmpty(error))
+						{
+							this.OnRegistrationError(new C2dmRegistrationError(error, C2dmRegistrationError.GetErrorDescription(error)));
+							return;
+						}
+					}
+					else if (c2dmAction == C2dmClient.GOOGLE_ACTION_C2DM_INTENT_RECEIVE)
+					{
+						this.OnMessageReceived(intent.Extras);
+					}
+
+				}
+				catch (Exception ex) 
+				{ 
+					Android.Util.Log.Error("C2DM-Sharp-BaseService", "Error Processing Intent: " + ex.Message + "\n" + ex.StackTrace); 
+				}
+			}
+
+			//Since we have no more items left to process, stop our service
+			StopSelf();
+		}
+
+		//These methods are meant to be overridden by the referencing project
+		public virtual void OnRegistered(string registrationId)
+		{
+		}
+
+		public virtual void OnUnregistered(string lastRegistrationId)
+		{
+		}
+
+		public virtual void OnMessageReceived(Bundle extras)
+		{
+		}
+
+		public virtual void OnRegistrationError(Exception ex)
+		{
 		}
 	}
 }

@@ -7,99 +7,98 @@ using Android.Runtime;
 using Android.Views;
 using Android.Widget;
 using Android.OS;
+using Android.Util;
 
 namespace C2dmSharp.Client.Sample
 {
-	[Activity(Label = "C2DM-Sharp Sample", MainLauncher = true)]
+	[Activity(Label = "C2DM-Sharp Sample", MainLauncher = true, 
+		LaunchMode= Android.Content.PM.LaunchMode.SingleTask)]
 	public class DefaultActivity : Activity
 	{
-		Button buttonRegister;
-		Button buttonUnregister;
+		//NOTE: You need to put your own email here!
+		// Whichever one you registered as the 'Role' email with google
+		public const string senderIdEmail = "redthc2dm@gmail.com";
+
+
+		TextView textRegistrationStatus = null;
+		TextView textRegistrationId = null;
+		TextView textLastMsg = null;
+		Button buttonRegister = null;
+		bool registered = false;
 
 		protected override void OnCreate(Bundle bundle)
 		{
 			base.OnCreate(bundle);
 
-			Android.Util.Log.D("C2DM-Sample", "Hello World!");
-
 			// Set our view from the "main" layout resource
-			SetContentView(Resource.layout.main);
+			SetContentView(Resource.Layout.main);
 
-			// Get our buttons from the layout resource,
-			// and attach an event to it
-			buttonRegister = FindViewById<Button>(Resource.id.buttonRegister);
-			buttonUnregister = FindViewById<Button>(Resource.id.buttonUnregister);
+			textRegistrationStatus = FindViewById<TextView>(Resource.Id.textRegistrationStatus);
+			textRegistrationId = FindViewById<TextView>(Resource.Id.textRegistrationId);
+			textLastMsg = FindViewById<TextView>(Resource.Id.textLastMessage);
+			buttonRegister = FindViewById<Button>(Resource.Id.buttonRegister);
 
-			Android.Util.Log.D("C2DM-Sample", "Got Buttons...");
+			Log.Info("C2DM-Sharp-UI", "Hello World");
 
-			buttonUnregister.Enabled = false;
-
-			buttonRegister.Click += delegate
+			this.buttonRegister.Click += delegate
 			{
-				try 
-				{ 
-					C2dmSharp.Client.C2dmClient.Register(this); 
-				}
-				catch (NoGoogleAccountsOnDeviceRegistrationException ngex)
+				if (!registered)
 				{
-					MakeToast("No Google Accounts on this Device!  Please add one and try again!");
+					Log.Info("C2DM-Sharp", "Registering...");
+					C2dmSharp.Client.C2dmClient.Register(this, senderIdEmail);
+				}
+				else
+				{
+					Log.Info("C2DM-Sharp", "Unregistering...");
+					C2dmSharp.Client.C2dmClient.Unregister(this);
 				}
 
-				buttonRegister.Enabled = false;
-			};
+				RunOnUiThread(() =>
+				{
+					//Disable the button so that we can't click it again
+					//until we get back to the activity from a notification
+					this.buttonRegister.Enabled = false;
+				});
+			};			
+		}
 
-			buttonUnregister.Click += delegate
+		protected override void OnResume()
+		{
+			base.OnResume();
+
+			updateView();
+		}
+
+		void updateView()
+		{
+			//Get the stored latest registration id
+			var registrationId = C2dmClient.GetRegistrationId(this);
+
+			//If it's empty, we need to register
+			if (string.IsNullOrEmpty(registrationId))
 			{
-				C2dmSharp.Client.C2dmClient.Unregister(this);
-				buttonUnregister.Enabled = false;
-			};
+				registered = false;
+				this.textRegistrationStatus.Text = "Registered: No";
+				this.textRegistrationId.Text = "Id: N/A";
+				this.buttonRegister.Text = "Register...";
 
+				Log.Info("C2DM-Sharp", "Not registered...");
+			}
+			else
+			{
+				registered = true;
+				this.textRegistrationStatus.Text = "Registered: Yes";
+				this.textRegistrationId.Text = "Id: " + registrationId;
+				this.buttonRegister.Text = "Unregister...";
 
-			Android.Util.Log.D("C2DM-Sample", "Registered Button Clicks...");
+				Log.Info("C2DM-Sharp", "Already Registered: " + registrationId);
+			}
 
-			C2dmSharp.Client.C2dmClient.ReceiveMessage += new Action<Bundle>(C2dmClient_ReceiveMessage);
-			C2dmSharp.Client.C2dmClient.Registered += new Action<string>(C2dmClient_Registered);
-			C2dmSharp.Client.C2dmClient.RegisterError += new Action<Exception>(C2dmClient_RegisterError);
-			C2dmSharp.Client.C2dmClient.Unregistered += new Action(C2dmClient_Unregistered);
+			var prefs = GetSharedPreferences("c2dm.client.sample", FileCreationMode.Private);
+			this.textLastMsg.Text = "Last Msg: " + prefs.GetString("last_msg", "N/A");
 
-			Android.Util.Log.D("C2DM-Sample", "Registered Client Events...");
-		}
-
-		void C2dmClient_Unregistered()
-		{
-			MakeToast("C2DM Unregistered");
-
-			if (buttonRegister != null)
-				buttonRegister.Enabled = true;
-		}
-
-		void C2dmClient_RegisterError(Exception ex)
-		{
-			MakeToast(ex.Message);
-		}
-
-		void C2dmClient_Registered(string registrationId)
-		{
-			MakeToast("C2DM Registered (ID: " + registrationId + ")");
-
-			if (buttonUnregister != null)
-				buttonUnregister.Enabled = true;
-		}
-
-		void C2dmClient_ReceiveMessage(Bundle extras)
-		{
-			var msg = new StringBuilder();
-			msg.AppendLine("C2DM Received Message");
-
-			foreach (var key in extras.KeySet())
-				msg.AppendLine("    " + key + "=" + extras.Get(key).ToString());
-
-			MakeToast(msg.ToString());
-		}
-
-		void MakeToast(string msg)
-		{
-			Toast.MakeText(this, msg, ToastLength.Short).Show();
+			//Enable the button as it was normally disabled
+			this.buttonRegister.Enabled = true;
 		}
 	}
 }
