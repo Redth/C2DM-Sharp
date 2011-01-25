@@ -19,23 +19,24 @@ For now, it's recommended that you merge the uncommented section of the AndroidM
 **Rate Limiting** Currently, the service will fire off messages from the queue as fast as possible.  It will backoff if google tells it to, but there's no other rate limiting mechanism in place (eg: to say only allow x requests per second).  This is something I think that would be a good addition.  You could then queue up a ton of messages and 'slowly' (relative term) send them without getting Google upset.
 
 ## How do I use it?
-+ First, sign up for C2DM at: http://code.google.com/android/c2dm/signup.html
-+ Download the source code and view the samples 
-+ Change your SenderID wherever relevant in the samples (eg: C2dmSharp.Client's DefaultActivity.cs in the top)
-+ If you're not using the Client.Sample, make sure you add the right permissions from the sample's manifest, with your own package name in the right places.  Also make sure you change the package name in your subclassed C2dmBroadcastReceiver's attributes!
-+ Better instructions coming soon... ;)
+1. First, sign up for C2DM at: http://code.google.com/android/c2dm/signup.html
+2. Download the source code and view the samples 
+3. Change your SenderID wherever relevant in the samples (eg: C2dmSharp.Client's DefaultActivity.cs in the top)
+4. If you're not using the Client.Sample, make sure you add the right permissions from the sample's manifest, with your own package name in the right places.  Also make sure you change the package name in your subclassed C2dmBroadcastReceiver's attributes!
+5. Better instructions coming soon... ;)
 
 ## Links
-+ **[C2DM Whitelist Registration](http://code.google.com/android/c2dm/signup.html)** : Google's site to register your application for C2DM
++ **[Official C2DM Documentation](http://code.google.com/android/c2dm/index.html)** : Google's C2DM Documentation
++ **[Official C2DM Whitelist Registration](http://code.google.com/android/c2dm/signup.html)** : Google's site to register your application for C2DM
 + **[APNS-Sharp](http://code.google.com/p/apns-sharp/)** : Sister Library, but for Apple iOS Push Notifications, for MonoTouch
 
 
 ## Changelog
-** Jan 22, 2011 @ 6:30pm **
-+ Samples work!  YMMV, you need to register your own accounts and make the changes in the right places, but I got it working here using both libraries!
-+ HUGE update, lots of changes, things actually work now, too many changes to list
+**Jan 22, 2011 @ 6:30pm**
+-  Samples work!  YMMV, you need to register your own accounts and make the changes in the right places, but I got it working here using both libraries!
+-  HUGE update, lots of changes, things actually work now, too many changes to list
 
-** Jan 20, 2011 @ 1:12pm **
-+ Server looks like it can actually send messages now :)
-+ Added Samples for Client and Server apps
-+ Server now will authenticate itself with the provided SenderID, Password, and ApplicationID
+**Jan 20, 2011 @ 1:12pm**
+-  Server looks like it can actually send messages now :)
+-  Added Samples for Client and Server apps
+-  Server now will authenticate itself with the provided SenderID, Password, and ApplicationID
