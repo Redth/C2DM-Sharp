@@ -44,6 +44,7 @@
     <Compile Include="C2dmMessage.cs" />
     <Compile Include="C2dmMessageTransport.cs" />
     <Compile Include="C2dmExceptions.cs" />
+    <Compile Include="C2dmMessageTransportAsync.cs" />
     <Compile Include="C2dmMessageTransportResponse.cs" />
     <Compile Include="C2dmMessageTransportWorker.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

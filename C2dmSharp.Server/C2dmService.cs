@@ -85,6 +85,10 @@ namespace C2dmSharp.Server
 				this.googleAuthToken = authToken;
 			};
 
+			C2dmMessageTransportAsync.MessageResponseReceived += delegate(C2dmMessageTransportResponse resp)
+			{
+			};
+
 			this.SenderID = senderID;
 			this.Password = password;
 			this.SenderID = senderID;
