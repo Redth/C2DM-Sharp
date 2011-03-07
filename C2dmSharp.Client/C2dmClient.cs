@@ -63,7 +63,7 @@ namespace C2dmSharp.Client
 		/// <param name="context">Context</param>
 		public static void Unregister(Context context)
 		{
-			Intent unregIntent = new Intent("com.google.android.c2dm.intent.UNREGISTER");
+			Intent unregIntent = new Intent(GOOGLE_ACTION_C2DM_INTENT_UNREGISTER);
 			unregIntent.PutExtra("app", PendingIntent.GetBroadcast(context, 0, new Intent(), 0));
 			context.StartService(unregIntent);
 		}
