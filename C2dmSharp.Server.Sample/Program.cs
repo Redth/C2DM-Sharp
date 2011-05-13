@@ -90,7 +90,8 @@ namespace C2dmSharp.Server.Sample
 						if (parts.Length > 1)
 							value = parts[1];
 
-						extras.Add("data." + key, value);
+                        // The 'data.' part gets prepended to the key automatically by the library
+						extras.Add(key, value);
 					}
 				}
 
