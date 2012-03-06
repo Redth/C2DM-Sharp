@@ -25,8 +25,12 @@ namespace C2dmSharp.Server
 
 		public void Stop()
 		{
-			this.cancelTokenSource.Cancel();
-			this.Task.Wait();
+			try
+			{
+				this.cancelTokenSource.Cancel();
+				this.Task.Wait(cancelTokenSource.Token);
+			}
+			catch { }
 		}
 
 		public CancellationToken CancelToken
