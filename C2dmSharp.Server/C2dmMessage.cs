@@ -60,8 +60,8 @@ namespace C2dmSharp.Server
 			var sb = new StringBuilder();
 
 			sb.AppendFormat("registration_id={0}&collapse_key={1}&", //&auth={2}&",
-				this.RegistrationId,
-				this.CollapseKey
+				HttpUtility.UrlEncode(this.RegistrationId),
+				HttpUtility.UrlEncode(this.CollapseKey)
 				//HttpUtility.UrlEncode(this.GoogleLoginAuthorizationToken)
 				);
 
@@ -71,8 +71,8 @@ namespace C2dmSharp.Server
 			foreach (var key in this.Data.AllKeys)
 			{
 				sb.AppendFormat("data.{0}={1}&",
-					key,
-					this.Data[key]);
+					HttpUtility.UrlEncode(key),
+					HttpUtility.UrlEncode(this.Data[key]));
 			}
 
 			//Remove trailing & if necessary
@@ -87,10 +87,10 @@ namespace C2dmSharp.Server
 			//http://groups.google.com/group/android-c2dm/browse_thread/thread/c70575480be4f883?pli=1
 			// suggests that the max size of 1024 bytes only includes 
 			// only char counts of:  keys, values, and the collapse_data value
-			int size = this.CollapseKey.Length;
+			int size = HttpUtility.UrlEncode(this.CollapseKey).Length;
 
 			foreach (var key in this.Data.AllKeys)
-				size += key.Length + this.Data[key].Length;
+				size += HttpUtility.UrlEncode(key).Length + HttpUtility.UrlEncode(this.Data[key]).Length;
 
 			return size;
 		}
