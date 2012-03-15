@@ -315,6 +315,9 @@ namespace C2dmSharp.Server
                 }
                 catch (ServiceUnavailableTransportException suEx)
                 {
+                    //Enqueue the message again to resend later
+                    QueueMessage(toSend);
+
                     //Backoff the last retry timespan + new one
                     lastRetryAfter += suEx.RetryAfter;
 
