@@ -46,8 +46,7 @@ namespace C2dmSharp.Server
 
 			using (var webReqStream = new StreamWriter(webReq.GetRequestStream(), Encoding.ASCII))
 			{
-				var data = msg.GetPostData();
-				webReqStream.Write(data);
+				webReqStream.Write(postData);
 				webReqStream.Close();
 			}		
 			
