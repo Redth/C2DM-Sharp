@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="C2dm-sharp : C# Client and Server Libraries for Android C2DM (Cloud 2 Device Messaging)" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>C2dm-sharp</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/Redth/C2DM-Sharp">Fork Me on GitHub</a>
+
+          <h1 id="project_title">C2dm-sharp</h1>
+          <h2 id="project_tagline">C# Client and Server Libraries for Android C2DM (Cloud 2 Device Messaging)</h2>
+
+          <section id="downloads">
+            <a class="zip_download_link" href="https://github.com/Redth/C2DM-Sharp/zipball/master">Download this project as a .zip file</a>
+            <a class="tar_download_link" href="https://github.com/Redth/C2DM-Sharp/tarball/master">Download this project as a tar.gz file</a>
+          </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>C2DM-Sharp</h1>
+
+<p>C2DM-Sharp is a set of .NET Libraries for <a href="http://code.google.com/android/c2dm/index.html">Google Android's Cloud 2 Device Messaging</a> Push Notification system.</p>
+
+<h2>What's it Contain?</h2>
+
+<ul>
+<li>
+<strong>C2dmSharp.Server</strong> - .NET Library for sending C2DM Messages to Google's Servers.  Mono and .NET compatible, 100% managed code</li>
+<li>
+<strong>C2dmSharp.Server.Sample</strong> - Command line sample that can send C2DM Messages with the library</li>
+<li>
+<strong>C2dmSharp.Client</strong> - <a href="http://www.monodroid.net">MonoDroid</a> Library to help with Registering for C2DM Messages, as well as listening for Incoming Messages</li>
+<li>
+<strong>C2dmSharp.Client.Sample</strong> - Sample Android app (replace <strong>PackageName</strong> in broadcast receiver with c2dmsharp.client.sample before compiling!!!)</li>
+</ul><h2>What's Missing?</h2>
+
+<p>The Client implementation, because of current MonoDroid limitations, does not completely generate the required AndroidManifest.xml changes in the referring application.
+I've written some of the attributes that are needed to make this happen, but if you look at attributes in the subclassed BroadcastReceiver in the Client sample, you can see that you would have to use your own package name for the manifest generation to work.<br>
+There is a bug report in to address this issue.  The other issue is the generation of the required  and  tags in the manifest.  Another bug was filed for this.  Here again you need to use your own package name where appropriate.</p>
+
+<p>For now, it's recommended that you merge the uncommented section of the AndroidManifest.xml (replacing <strong>PackageName</strong>) with your Application's manifest, and then changing the line mentioned above to refer to your package name.</p>
+
+<p><strong>Scalability</strong> I have the service able to use a number of worker Tasks, but currently all the HTTP requests aren't taking advantage of async calls.  I plan on changing this so that the service can scale well.</p>
+
+<p><strong>Rate Limiting</strong> Currently, the service will fire off messages from the queue as fast as possible.  It will backoff if google tells it to, but there's no other rate limiting mechanism in place (eg: to say only allow x requests per second).  This is something I think that would be a good addition.  You could then queue up a ton of messages and 'slowly' (relative term) send them without getting Google upset.</p>
+
+<h2>How do I use it?</h2>
+
+<ol>
+<li>First, sign up for C2DM at: <a href="http://code.google.com/android/c2dm/signup.html">http://code.google.com/android/c2dm/signup.html</a></li>
+<li>Download the source code and view the samples </li>
+<li>Change your SenderID wherever relevant in the samples (eg: C2dmSharp.Client's DefaultActivity.cs in the top)</li>
+<li>If you're not using the Client.Sample, make sure you add the right permissions from the sample's manifest, with your own package name in the right places.  Also make sure you change the package name in your subclassed C2dmBroadcastReceiver's attributes!</li>
+<li>Better instructions coming soon... ;)</li>
+</ol><h2>Links</h2>
+
+<ul>
+<li>
+<strong><a href="http://code.google.com/android/c2dm/index.html">Official C2DM Documentation</a></strong> : Google's C2DM Documentation</li>
+<li>
+<strong><a href="http://code.google.com/android/c2dm/signup.html">Official C2DM Whitelist Registration</a></strong> : Google's site to register your application for C2DM</li>
+<li>
+<strong><a href="http://code.google.com/p/apns-sharp/">APNS-Sharp</a></strong> : Sister Library, but for Apple iOS Push Notifications, for MonoTouch</li>
+</ul><h2>Changelog</h2>
+
+<p><strong>Jan 22, 2011 @ 6:30pm</strong>
+-  Samples work!  YMMV, you need to register your own accounts and make the changes in the right places, but I got it working here using both libraries!
+-  HUGE update, lots of changes, things actually work now, too many changes to list</p>
+
+<p><strong>Jan 20, 2011 @ 1:12pm</strong>
+-  Server looks like it can actually send messages now :)
+-  Added Samples for Client and Server apps
+-  Server now will authenticate itself with the provided SenderID, Password, and ApplicationID</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">C2dm-sharp maintained by <a href="https://github.com/Redth">Redth</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-6465612-20");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+
+  </body>
+</html>
